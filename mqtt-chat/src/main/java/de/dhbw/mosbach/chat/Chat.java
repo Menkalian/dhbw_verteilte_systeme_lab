@@ -43,7 +43,7 @@ public class Chat implements IChat {
 
         this.client.subscribe(
                 Mqtt5Subscribe.builder()
-                        .topicFilter("/aichat/#")
+                        .topicFilter("/aichat/default")
                         .build(),
                 pubMsg -> {
                     try {
@@ -70,7 +70,7 @@ public class Chat implements IChat {
 
     @Override
     public void sendMessage(String topic, String user, String message) {
-        MessagePayload payload = new MessagePayload(user, message, getClientId(), topic);
+        MessagePayload payload = new MessagePayload(user, message, getClientId(), "default");
 
         try {
             this.client.publishWith()
