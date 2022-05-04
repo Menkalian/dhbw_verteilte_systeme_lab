@@ -6,8 +6,10 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
+import com.hivemq.client.mqtt.mqtt5.message.subscribe.Mqtt5Subscribe;
 import de.dhbw.mosbach.chat.pojo.MessagePayload;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,6 +40,22 @@ public class Chat implements IChat {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        this.client.subscribe(
+                Mqtt5Subscribe.builder()
+                        .topicFilter("/aichat/#")
+                        .build(),
+                pubMsg -> {
+                    try {
+                        MessagePayload payload = json.readValue(pubMsg.getPayloadAsBytes(), MessagePayload.class);
+                        for (IMessageListener listener : this.listeners) {
+                            listener.messageReceived(payload.getClientId(), payload.getTopic(), payload.getSender(), payload.getText());
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+        );
     }
 
     @Override
