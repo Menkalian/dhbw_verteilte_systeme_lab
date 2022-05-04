@@ -14,5 +14,4 @@ public interface IChat {
     void removeListener(IMessageListener listener);
 
     void sendMessage(String user, String message);
-    String getClientId();
 }

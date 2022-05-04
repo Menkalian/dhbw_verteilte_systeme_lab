@@ -1,7 +1,5 @@
 package de.dhbw.mosbach.chat;
 
-import java.util.UUID;
-
 public class Connector {
     String savedUsername = "Username";
     Chat chat;
@@ -14,6 +12,7 @@ public class Connector {
         chat.addListener(ui::showReceivedMessage);
         ui.addListener(new UIListener());
     }
+
     public class UIListener implements IUserInterface.IInputListener {
 
         @Override
