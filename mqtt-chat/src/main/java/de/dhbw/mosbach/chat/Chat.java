@@ -21,14 +21,14 @@ public class Chat implements IChat {
     public Chat() {
         this.client = Mqtt5Client.builder().serverHost(Configuration.INSTANCE.serverHost).buildAsync();
         try {
-            client.connect().get();
+            //client.connect().get();
             client.connectWith().willPublish()
                     .topic(Configuration.INSTANCE.rootTopic + Configuration.INSTANCE.stateSubTopic)
-                    .payload(("Chat Client " + Configuration.INSTANCE.clientId + "stopped").getBytes(StandardCharsets.UTF_8))
+                    .payload(("Chat Client " + Configuration.INSTANCE.clientId + " stopped").getBytes(StandardCharsets.UTF_8))
                     .contentType("text/plain")
                     .qos(MqttQos.AT_MOST_ONCE)
                     .applyWillPublish()
-                    .send();
+                    .send().get();
             client.publishWith()
                     .topic(Configuration.INSTANCE.rootTopic + Configuration.INSTANCE.stateSubTopic)
                     .qos(MqttQos.AT_LEAST_ONCE)
