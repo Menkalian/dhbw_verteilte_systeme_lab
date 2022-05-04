@@ -17,22 +17,22 @@ import java.util.UUID;
 
 public class Chat implements IChat {
     private final Mqtt5AsyncClient client;
-    private final UUID uuid = UUID.randomUUID();
     private final List<IMessageListener> listeners = new LinkedList<>();
     private final JsonMapper json = new JsonMapper();
 
     public Chat() {
         this.client = Mqtt5Client.builder().serverHost("10.50.12.150").buildAsync();
         try {
+            client.connect().get();
             client.connectWith().willPublish()
-                    .topic("aichat/clientstate")
+                    .topic("/aichat/clientstate")
                     .payload(("Chat Client " + getClientId() + "stopped").getBytes(StandardCharsets.UTF_8))
                     .contentType("text/plain")
                     .qos(MqttQos.AT_MOST_ONCE)
                     .applyWillPublish()
                     .send();
             client.publishWith()
-                    .topic("aichat/clientstate")
+                    .topic("/aichat/clientstate")
                     .qos(MqttQos.AT_LEAST_ONCE)
                     .payload(("Chat Client " + getClientId() + " started").getBytes(StandardCharsets.UTF_8))
                     .contentType("text/plain")
@@ -49,13 +49,18 @@ public class Chat implements IChat {
                     try {
                         MessagePayload payload = json.readValue(pubMsg.getPayloadAsBytes(), MessagePayload.class);
                         for (IMessageListener listener : this.listeners) {
-                            listener.messageReceived(payload.getClientId(), payload.getTopic(), payload.getSender(), payload.getText());
+                            listener.messageReceived(payload);
                         }
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
                 }
         );
+    }
+
+    @Override
+    public void close() {
+        client.disconnect();
     }
 
     @Override
@@ -69,8 +74,9 @@ public class Chat implements IChat {
     }
 
     @Override
-    public void sendMessage(String topic, String user, String message) {
-        MessagePayload payload = new MessagePayload(user, message, getClientId(), "default");
+    public void sendMessage(String user, String message) {
+        String topic = "default";
+        MessagePayload payload = new MessagePayload(user, message, getClientId(), topic);
 
         try {
             this.client.publishWith()
@@ -85,6 +91,6 @@ public class Chat implements IChat {
 
     @Override
     public String getClientId() {
-        return this.uuid.toString();
+        return "4b298fe1-67f3-43b7-9ab4-200488a83e90";
     }
 }

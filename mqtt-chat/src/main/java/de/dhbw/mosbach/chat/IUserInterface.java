@@ -1,14 +1,14 @@
 package de.dhbw.mosbach.chat;
 
+import de.dhbw.mosbach.chat.pojo.MessagePayload;
+
 public interface IUserInterface {
     void addListener(IInputListener listener);
     void removeListener(IInputListener listener);
 
-    void showReceivedMessage(String clientId, String topic, String user, String message);
+    void showReceivedMessage(MessagePayload payload);
 
     interface IInputListener {
-        void onTopicSet(String topic);
-
         void onUsernameSet(String username);
 
         void onMessageInput(String input);
