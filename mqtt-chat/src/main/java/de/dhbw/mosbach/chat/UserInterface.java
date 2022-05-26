@@ -122,7 +122,7 @@ public class UserInterface implements IUserInterface, TerminalResizeListener {
             rows--;
 
             synchronized (messages) {
-                for (int i = messages.size() - 1 ; i > 0 && rows > 0 ; i--) {
+                for (int i = messages.size() - 1 ; i >= 0 && rows > 0 ; i--) {
                     term.setCursorPosition(0, rows);
                     MessagePayload p = messages.get(i);
                     term.setForegroundColor(TextColor.ANSI.GREEN);
