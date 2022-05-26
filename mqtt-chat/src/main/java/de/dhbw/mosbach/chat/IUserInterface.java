@@ -12,5 +12,7 @@ public interface IUserInterface {
         void onUsernameSet(String username);
 
         void onMessageInput(String input);
+
+        void onClosed();
     }
 }

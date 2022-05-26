@@ -1,5 +1,8 @@
 package de.dhbw.mosbach.chat;
 
+import java.awt.Frame;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,6 +37,18 @@ public class UserInterface implements IUserInterface, TerminalResizeListener {
             term = terminalFactory.createTerminal();
             term.addResizeListener(this);
             term.setCursorVisible(false);
+
+            // If the default Terminal is a GUI-Implementation we should listen when it's closed
+            if (term instanceof Frame) {
+                Frame termFrame = (Frame) term;
+                termFrame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosed(WindowEvent e) {
+                        // Exit directly. Cleanup is handled by last will
+                        System.exit(0);
+                    }
+                });
+            }
         } catch (IOException ex) {
             ex.printStackTrace();
             throw new RuntimeException("Initialization failed", ex);
@@ -140,10 +155,15 @@ public class UserInterface implements IUserInterface, TerminalResizeListener {
                     continue;
                 }
 
-                // Quit on F3
+                // Quit on F3 (Clean shutdown)
                 if (k.getKeyType() == KeyType.F3) {
                     term.close();
                     inputReaderExecutor.shutdown();
+                    synchronized (listeners) {
+                        for (IInputListener listener : listeners) {
+                            listener.onClosed();
+                        }
+                    }
                     break;
                 }
 
