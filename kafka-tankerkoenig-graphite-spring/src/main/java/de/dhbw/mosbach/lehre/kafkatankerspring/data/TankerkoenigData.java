@@ -1,4 +1,4 @@
-package de.dhbw.mosbach.lehre.kafkaweatherspring.data;
+package de.dhbw.mosbach.lehre.kafkatankerspring.data;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;

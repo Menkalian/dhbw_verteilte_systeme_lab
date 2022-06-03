@@ -1,4 +1,4 @@
-package de.dhbw.mosbach.lehre.kafkaweatherspring;
+package de.dhbw.mosbach.lehre.kafkatankerspring;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.codahale.metrics.graphite.Graphite;
-import de.dhbw.mosbach.lehre.kafkaweatherspring.data.TankerkoenigData;
+import de.dhbw.mosbach.lehre.kafkatankerspring.data.TankerkoenigData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -33,6 +33,7 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 @Slf4j
 @SpringBootApplication
 public class KafkaTankerkoenigSpringApplication {
+    private static boolean RESET_DATA = false;
     private static final int PARTITION_COUNT = 10;
     private static final String KAFKA_TOPIC = "tankerkoenig";
 
@@ -113,6 +114,8 @@ public class KafkaTankerkoenigSpringApplication {
 
                             aggregatedData.add(record.value());
                         }
+
+                        consumer.commitAsync();
                     }
                 }
             } catch (IOException ex) {
@@ -126,7 +129,9 @@ public class KafkaTankerkoenigSpringApplication {
     private static void configureConsumer(Consumer<?, ?> consumer, String topic, int partition) {
         TopicPartition partitionObj = new TopicPartition(topic, partition);
         consumer.assign(Collections.singletonList(partitionObj));
-        consumer.seekToBeginning(Collections.singletonList(partitionObj));
+        if (RESET_DATA) {
+            consumer.seekToBeginning(Collections.singletonList(partitionObj));
+        }
     }
 
     private static Graphite connectToGraphite() {
@@ -153,7 +158,7 @@ public class KafkaTankerkoenigSpringApplication {
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class.getName());
         consumerProperties.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JsonDeserializer.class.getName());
         consumerProperties.put(JsonDeserializer.VALUE_DEFAULT_TYPE, TankerkoenigData.class.getName());
-        consumerProperties.put(JsonDeserializer.TRUSTED_PACKAGES, "de.dhbw.mosbach.lehre.kafkaweatherspring");
+        consumerProperties.put(JsonDeserializer.TRUSTED_PACKAGES, "de.dhbw.mosbach.lehre.kafkatankerspring");
         return consumerProperties;
     }
 }
